@@ -1,0 +1,105 @@
+.........................................................
+2023/08
+Divakaran A.
+
+
+1) python file
+	target : convert bin file to .h file
+
+	process : 
+			1. read the .bin file
+			2. define the header file
+			3. 8bit data type used to creat veriables
+			4. store read data in 8 bit 2D array with lenght of 1024 and width according to bin file size (2d matrix)
+
+	instructions : 
+			1. place .py file in same folder that .bin file placed
+			2. run the pyhton file with first argument with the .bin file name
+					ex - ( python3 bin_to_hex.py stm32_bin_file.bin)
+			3. stm32_bin.h file now creat in the folder
+			4. move the stm32_bin.h file to the main directory of the espidf project
+
+2) ESPidf file
+	target : firmware update of stm32f103
+
+	functions :
+			1. init_uart_2()
+					UART configuration ( baud rate -115200)
+			2. gpio_init_2()
+					gpio pin initializing
+			3. gpio_boot_set()
+					enable boot mode of the stm32
+			4. gpio_boot_rset()
+					disable boot mode of the stm32
+			5. write_address_checksum()
+					checksum of the 32bit address
+			6. enter_bootmode_2()
+					flasing process
+			7. stm32_flash()
+			8. stm32_check()
+					check the stm32 firmware version
+
+
+
+// ------------------------------------------------------------------------
+
+------------------------   stm32 firmupdate step
+
+BOOT0 to 1
+
+RESET to 1
+RESET to 0
+
+# boot mode enter
+TX 0x7F
+RX 0x79
+
+# flash erase
+TX 0x43
+TX 0xBC
+RX 0x79		// erasing flash
+
+TX 0xFF
+TX 0x00
+RX 0x79		// flash Erase success
+
+# load update
+------- loop ---------------
+TX 0x31
+TX 0xCE
+RX 0x79
+
+send address starting 0x08000000
+
+0x12345678
+|31           24|23           16|15            8|7         bit 0|
++---------------+---------------+---------------+---------------+
+|0 0 0 1 0 0 1 0|0 0 1 1 0 1 0 0|0 1 0 1 0 1 1 0|0 1 1 1 1 0 0 0|
++---------------+---------------+---------------+---------------+
+
+TX
+1byte - 0 0 0 1 0 0 1 0
+2byte - 0 0 1 1 0 1 0 0
+3byte - 0 1 0 1 0 1 1 0
+4byte - 0 1 1 1 1 0 0 0
+5byte - XOR (|0 0 0 1 0 0 1 0|0 0 1 1 0 1 0 0|0 1 0 1 0 1 1 0|0 1 1 1 1 0 0 0|)
+
+RX 0x79		// address send
+
+TX number of bytes --- (128 -1)
+
+Tx 128 byte send
+
+checksunm TX -- XOR(send byte)
+
+RX 0x79		// packet send done .........................
+
+
+512KB files
+
+
+BOOT0 to 0
+
+RESET to 1
+RESET to 0
+----------------------------------------------
