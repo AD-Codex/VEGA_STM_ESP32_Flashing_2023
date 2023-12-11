@@ -1,4 +1,5 @@
-# Vega_stm32Flash_eps32
+# STM32 chip flash using ESP32 chip
+In this method bin file of STM32 was added to the ESP32 script. This method use for overcome the limitation of HTTP and MQTT methods.
 -----------------------
 
 -----------------
